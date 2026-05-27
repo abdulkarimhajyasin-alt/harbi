@@ -1,0 +1,81 @@
+<section class="cards-grid">
+  <article class="metric-card">
+    <span>الزبائن</span>
+    <strong>{{ summary.customer_count }}</strong>
+  </article>
+  {% if dashboard_user.id == current_user.id %}
+  <a class="metric-card metric-link" href="/downloads">
+    <span>التنزيل</span>
+    <strong>{{ "%.2f"|format(summary.download_balance) }}</strong>
+  </a>
+  {% else %}
+  <article class="metric-card">
+    <span>التنزيل</span>
+    <strong>{{ "%.2f"|format(summary.download_balance) }}</strong>
+  </article>
+  {% endif %}
+  <article class="metric-card">
+    <span>جرد عام</span>
+    <strong>{{ "%.2f"|format(summary.total_due) }}</strong>
+  </article>
+</section>
+
+<section class="panel">
+  <div class="section-head">
+    <h2>سجل العمليات</h2>
+    {% if dashboard_user.id == current_user.id %}
+    <form method="post" action="/dashboard/clear-log" onsubmit="return confirm('هل أنت متأكد من مسح سجل العمليات؟');">
+      <button class="small-button danger-button" type="submit">مسح السجل</button>
+    </form>
+    {% endif %}
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>نوع العملية</th>
+          <th>اسم الزبون</th>
+          <th>المبلغ</th>
+          <th>التاريخ</th>
+          <th>الوقت</th>
+          <th>الرصيد بعد العملية</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for operation in operations %}
+        <tr>
+          <td>{% if operation.operation_type == "transfer" %}إضافة حوالة{% else %}واصل منه{% endif %}</td>
+          <td>{{ operation.customer.customer_name }}</td>
+          <td>{{ "%.2f"|format(operation.amount) }}</td>
+          <td>{{ operation.created_at.strftime("%Y-%m-%d") }}</td>
+          <td>{{ operation.created_at.strftime("%H:%M") }}</td>
+          <td>{{ "%.2f"|format(operation.balance_after) }}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="6">لا توجد عمليات بعد</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="panel muted-panel">
+  <h2>مساحة محجوزة</h2>
+  <p>سيتم إضافة وحدات جديدة هنا لاحقا</p>
+</section>
+
+<section class="panel">
+  <div class="section-head">
+    <h2>الزبائن</h2>
+  </div>
+  <div class="customer-list">
+    {% for customer in customers %}
+    <a class="customer-row" href="/customers/{{ customer.id }}">
+      <span>{{ customer.customer_name }}</span>
+      <strong>{{ "%.2f"|format(customer.total_due) }}</strong>
+    </a>
+    {% else %}
+    <p class="empty">لا يوجد زبائن بعد</p>
+    {% endfor %}
+  </div>
+</section>

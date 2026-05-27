@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}تفاصيل المستخدم{% endblock %}
+{% block content %}
+<header class="page-head">
+  <div>
+    <p>تفاصيل المستخدم</p>
+    <h1>{{ selected_user.name }}</h1>
+  </div>
+</header>
+
+<section class="cards-grid">
+  <article class="metric-card">
+    <span>اسم المستخدم</span>
+    <strong>{{ selected_user.name }}</strong>
+  </article>
+  <article class="metric-card">
+    <span>عدد الزبائن</span>
+    <strong>{{ selected_summary.customer_count }}</strong>
+  </article>
+  <article class="metric-card">
+    <span>عدد العمليات</span>
+    <strong>{{ selected_summary.operation_count }}</strong>
+  </article>
+  <article class="metric-card">
+    <span>الإجمالي المتبقي</span>
+    <strong>{{ "%.2f"|format(selected_summary.total_due) }}</strong>
+  </article>
+</section>
+
+{% include "partials/user_dashboard.html" %}
+{% endblock %}

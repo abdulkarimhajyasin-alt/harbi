@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}الرئيسية{% endblock %} - جرد حساباتي</title>
+  <link rel="icon" href="{{ url_for('static', path='icons/favicon.svg') }}" type="image/svg+xml">
+  <link rel="icon" href="{{ url_for('static', path='icons/favicon-32.png') }}" sizes="32x32" type="image/png">
+  <link rel="apple-touch-icon" href="{{ url_for('static', path='icons/favicon-192.png') }}">
+  <link rel="stylesheet" href="{{ url_for('static', path='css/styles.css') }}">
+</head>
+<body>
+  <div class="shell">
+    {% if current_user %}
+    <aside class="sidebar">
+      <div class="brand">
+        <img class="brand-icon" src="{{ url_for('static', path='icons/app-icon.svg') }}" alt="" aria-hidden="true">
+        <span>جرد حساباتي</span>
+      </div>
+      <nav class="nav">
+        {% if current_user.role == "admin" %}
+        <a href="/admin/users">المستخدمون</a>
+        <a href="/admin/account">إعدادات الحساب</a>
+        {% else %}
+        <a href="/dashboard">الرئيسية</a>
+        <a href="/account">إعدادات الحساب</a>
+        {% endif %}
+      </nav>
+      <form method="post" action="/logout">
+        <button class="ghost-button" type="submit">تسجيل الخروج</button>
+      </form>
+    </aside>
+    {% endif %}
+    <main class="content {% if not current_user %}centered{% endif %}">
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+  <script src="{{ url_for('static', path='js/app.js') }}"></script>
+</body>
+</html>

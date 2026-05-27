@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}الإشعارات{% endblock %}
+{% block content %}
+<header class="page-head">
+  <div>
+    <p>الإدارة</p>
+    <h1>الإشعارات</h1>
+  </div>
+  <div class="bell">
+    <span>🔔</span>
+    <strong>{{ unread_count }}</strong>
+  </div>
+</header>
+
+<section class="panel">
+  <div class="section-head">
+    <h2>كل الإشعارات</h2>
+    {% if notifications %}
+    <form method="post" action="/admin/notifications/read-all">
+      <button class="small-button" type="submit">تحديد الكل كمقروء</button>
+    </form>
+    {% endif %}
+  </div>
+  <div class="notification-list">
+    {% for notification in notifications %}
+    <article class="notification-item {% if not notification.is_read %}unread{% endif %}">
+      <div class="notification-content">
+        <strong>{{ notification.title }}</strong>
+        <p>{{ notification.body }}</p>
+        <small>{{ notification.created_at.strftime("%Y-%m-%d %H:%M") }}</small>
+      </div>
+      {% if not notification.is_read %}
+      <form method="post" action="/admin/notifications/{{ notification.id }}/read">
+        <button class="small-button" type="submit">تحديد كمقروء</button>
+      </form>
+      {% else %}
+      <span class="read-state">مقروء</span>
+      {% endif %}
+    </article>
+    {% else %}
+    <p class="empty">لا توجد إشعارات بعد</p>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

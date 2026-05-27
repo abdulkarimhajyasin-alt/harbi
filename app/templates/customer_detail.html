@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% block title %}الزبون{% endblock %}
+{% block content %}
+<header class="page-head">
+  <div>
+    <p>الزبون</p>
+    <h1>{{ customer.customer_name }}</h1>
+  </div>
+  <strong class="balance">{{ "%.2f"|format(customer.total_due) }}</strong>
+</header>
+
+{% if error %}<p class="alert">{{ error }}</p>{% endif %}
+
+<section class="cards-grid two">
+  <button class="action-card" data-open-modal="transfer-modal">
+    <span>إضافة حوالة</span>
+    <strong>+</strong>
+  </button>
+  <button class="action-card" data-open-modal="payment-modal">
+    <span>واصل منه</span>
+    <strong>-</strong>
+  </button>
+</section>
+
+<section class="panel">
+  <div class="section-head">
+    <h2>سجل الزبون</h2>
+    <form method="post" action="/customers/{{ customer.id }}/clear-log" onsubmit="return confirm('هل أنت متأكد من مسح سجل هذا الزبون؟');">
+      <button class="small-button danger-button" type="submit">مسح السجل</button>
+    </form>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>نوع العملية</th>
+          <th>اسم الزبون</th>
+          <th>المبلغ</th>
+          <th>التاريخ</th>
+          <th>الوقت</th>
+          <th>الرصيد بعد العملية</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for operation in operations %}
+        <tr>
+          <td>{% if operation.operation_type == "transfer" %}إضافة حوالة{% else %}واصل منه{% endif %}</td>
+          <td>{{ operation.customer.customer_name }}</td>
+          <td>{{ "%.2f"|format(operation.amount) }}</td>
+          <td>{{ operation.created_at.strftime("%Y-%m-%d") }}</td>
+          <td>{{ operation.created_at.strftime("%H:%M") }}</td>
+          <td>{{ "%.2f"|format(operation.balance_after) }}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="6">لا توجد عمليات بعد</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<div class="modal" id="transfer-modal" aria-hidden="true">
+  <div class="modal-card">
+    <h2>إضافة حوالة</h2>
+    <form method="post" action="/customers/{{ customer.id }}/transfer" class="form" novalidate>
+      <label for="transfer_amount">المبلغ</label>
+      <input id="transfer_amount" name="amount" type="number" step="0.01" min="0">
+      <div class="actions">
+        <button type="submit">إضافة</button>
+        <button type="button" class="secondary" data-close-modal>إلغاء</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="modal" id="payment-modal" aria-hidden="true">
+  <div class="modal-card">
+    <h2>واصل منه</h2>
+    <form method="post" action="/customers/{{ customer.id }}/payment" class="form" novalidate>
+      <label for="payment_amount">المبلغ المستلم</label>
+      <input id="payment_amount" name="amount" type="number" step="0.01" min="0">
+      <div class="actions">
+        <button type="submit">إضافة</button>
+        <button type="button" class="secondary" data-close-modal>إلغاء</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

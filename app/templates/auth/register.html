@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}إنشاء حساب{% endblock %}
+{% block content %}
+<section class="auth-panel">
+  <div class="auth-brand">
+    <img class="auth-brand-icon" src="{{ url_for('static', path='icons/app-icon.svg') }}" alt="" aria-hidden="true">
+    <span>جرد حساباتي</span>
+  </div>
+  <h1>إنشاء حساب</h1>
+  {% if error %}<p class="alert">{{ error }}</p>{% endif %}
+  <form method="post" action="/register" class="form" novalidate>
+    <label for="name">الاسم</label>
+    <input id="name" name="name" type="text" autocomplete="name">
+    <label for="username">اسم المستخدم</label>
+    <input id="username" name="username" type="text" autocomplete="username">
+    <label for="password">كلمة المرور</label>
+    <input id="password" name="password" type="password" autocomplete="new-password">
+    <button type="submit">إنشاء</button>
+  </form>
+  <a class="text-link" href="/login">لديك حساب؟</a>
+</section>
+{% endblock %}

@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}الرئيسية{% endblock %}
+{% block content %}
+<header class="page-head">
+  <div>
+    <p>مرحبا</p>
+    <h1>{{ current_user.name }}</h1>
+  </div>
+</header>
+
+{% include "partials/user_dashboard.html" %}
+
+<button class="fab" data-open-modal="customer-modal" aria-label="إضافة">+</button>
+<div class="modal" id="customer-modal" aria-hidden="true">
+  <div class="modal-card">
+    <h2>إضافة زبون</h2>
+    <form method="post" action="/customers" class="form" novalidate>
+      <label for="customer_name">اسم الزبون</label>
+      <input id="customer_name" name="customer_name" type="text">
+      <div class="actions">
+        <button type="submit">إضافة</button>
+        <button type="button" class="secondary" data-close-modal>إلغاء</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

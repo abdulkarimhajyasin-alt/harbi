@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}لوحة المدير{% endblock %}
+{% block content %}
+<header class="page-head">
+  <div>
+    <p>لوحة المدير</p>
+    <h1>{{ current_user.name }}</h1>
+  </div>
+  <a class="bell" href="/admin/notifications">
+    <span>🔔</span>
+    <strong>{{ unread_count }}</strong>
+  </a>
+</header>
+
+<section class="panel">
+  <div class="section-head">
+    <h2>الإشعارات</h2>
+    <a href="/admin/notifications">عرض الكل</a>
+  </div>
+  <div class="notification-list">
+    {% for notification in notifications %}
+    <article class="notification-item {% if not notification.is_read %}unread{% endif %}">
+      <strong>{{ notification.title }}</strong>
+      <p>{{ notification.body }}</p>
+      <small>{{ notification.created_at.strftime("%Y-%m-%d %H:%M") }}</small>
+    </article>
+    {% else %}
+    <p class="empty">لا توجد إشعارات بعد</p>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="panel">
+  <div class="section-head">
+    <h2>آخر المستخدمين</h2>
+    <a href="/admin/users">عرض الكل</a>
+  </div>
+  <div class="customer-list">
+    {% for user in users %}
+    <a class="customer-row" href="/admin/users/{{ user.id }}">
+      <span>{{ user.name }}</span>
+      <strong>{% if user.role == "admin" %}مدير{% else %}مستخدم{% endif %}</strong>
+    </a>
+    {% else %}
+    <p class="empty">لا يوجد مستخدمون بعد</p>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

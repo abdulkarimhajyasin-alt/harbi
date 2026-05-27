@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}المستخدمون{% endblock %}
+{% block content %}
+<section class="panel">
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>الاسم</th>
+          <th>الدور</th>
+          <th>تاريخ الإنشاء</th>
+          <th>الحالة</th>
+          <th>الإجراء</th>
+          <th>حذف</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for user in users %}
+        <tr>
+          <td><a class="text-link table-link" href="/admin/users/{{ user.id }}">{{ user.name }}</a></td>
+          <td>{% if user.role == "admin" %}مدير{% else %}مستخدم{% endif %}</td>
+          <td>{{ user.created_at.strftime("%Y-%m-%d") }}</td>
+          <td>{% if user.is_active %}مفعل{% else %}متوقف{% endif %}</td>
+          <td>
+            {% if user.role == "admin" or user.id == current_user.id %}
+            <span class="read-state">مفعل</span>
+            {% else %}
+            <form class="table-action-form" method="post" action="/admin/users/{{ user.id }}/activation" onclick="event.stopPropagation();">
+              <button class="small-button {% if user.is_active %}danger-button{% endif %}" type="submit" data-table-action>
+                {% if user.is_active %}إيقاف{% else %}تشغيل{% endif %}
+              </button>
+            </form>
+            {% endif %}
+          </td>
+          <td>
+            {% if user.role == "admin" or user.id == current_user.id %}
+            <span class="read-state">غير متاح</span>
+            {% else %}
+            <form class="table-action-form" method="post" action="/admin/users/{{ user.id }}/delete" onclick="event.stopPropagation();" onsubmit="return confirm('هل أنت متأكد من حذف هذا المستخدم؟');">
+              <button class="small-button danger-button" type="submit" data-table-action>حذف</button>
+            </form>
+            {% endif %}
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="6">لا يوجد مستخدمون بعد</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}
