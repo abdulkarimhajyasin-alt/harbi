@@ -1,7 +1,7 @@
 from decimal import Decimal, InvalidOperation
 
 from fastapi import HTTPException, status
-from sqlalchemy import func, select
+from sqlalchemy import exists, func, or_, select
 from sqlalchemy.orm import Session
 
 from app.models.customer import Customer
@@ -31,11 +31,44 @@ def create_customer(db: Session, owner: User, customer_name: str) -> Customer:
     return customer
 
 
+def visible_customer_filter(user: User):
+    legacy_operation_link = exists(
+        select(OperationLog.id).where(
+            OperationLog.customer_id == Customer.id,
+            OperationLog.user_id == user.id,
+        )
+    )
+    legacy_user_count = (
+        select(func.count(func.distinct(OperationLog.user_id)))
+        .where(OperationLog.customer_id == Customer.id)
+        .scalar_subquery()
+    )
+    owner_exists = exists(select(User.id).where(User.id == Customer.owner_id))
+    legacy_owner_missing = Customer.owner_id.is_(None) | ~owner_exists
+    legacy_owned_by_user = legacy_operation_link & (legacy_user_count == 1)
+    return or_(
+        Customer.owner_id == user.id,
+        legacy_owner_missing & legacy_owned_by_user,
+    )
+
+
+def visible_customers_for_user(db: Session, user: User) -> list[Customer]:
+    return list(
+        db.scalars(
+            select(Customer)
+            .where(visible_customer_filter(user))
+            .order_by(Customer.created_at.desc())
+        )
+    )
+
+
 def get_customer_for_user(db: Session, customer_id: int, user: User) -> Customer:
     customer = db.get(Customer, customer_id)
     if not customer:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="الزبون غير موجود")
-    if user.role != "admin" and customer.owner_id != user.id:
+    if user.role != "admin" and not db.scalar(
+        select(visible_customer_filter(user)).where(Customer.id == customer.id)
+    ):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="غير مصرح")
     return customer
 
@@ -49,7 +82,7 @@ def search_customers_for_user(db: Session, user: User, query: str, limit: int = 
         db.scalars(
             select(Customer)
             .where(
-                Customer.owner_id == user.id,
+                visible_customer_filter(user),
                 Customer.customer_name.ilike(f"%{escaped_term}%", escape="\\"),
             )
             .order_by(Customer.customer_name.asc())
@@ -90,9 +123,9 @@ def receive_payment(db: Session, customer: Customer, user: User, amount: Decimal
 
 
 def user_summary(db: Session, user: User) -> dict[str, Decimal | int]:
-    customer_count = db.scalar(select(func.count(Customer.id)).where(Customer.owner_id == user.id)) or 0
+    customer_count = db.scalar(select(func.count(Customer.id)).where(visible_customer_filter(user))) or 0
     operation_count = db.scalar(select(func.count(OperationLog.id)).where(OperationLog.user_id == user.id)) or 0
-    total_due = db.scalar(select(func.coalesce(func.sum(Customer.total_due), 0)).where(Customer.owner_id == user.id))
+    total_due = db.scalar(select(func.coalesce(func.sum(Customer.total_due), 0)).where(visible_customer_filter(user)))
     transfer_total = db.scalar(
         select(func.coalesce(func.sum(OperationLog.amount), 0)).where(
             OperationLog.user_id == user.id,

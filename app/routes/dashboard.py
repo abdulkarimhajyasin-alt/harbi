@@ -5,10 +5,9 @@ from sqlalchemy import delete, select
 from sqlalchemy.orm import Session, joinedload
 
 from app.database.session import get_db
-from app.models.customer import Customer
 from app.models.operation_log import OperationLog
 from app.routes.common import current_user_or_redirect
-from app.services.customers import user_summary
+from app.services.customers import user_summary, visible_customers_for_user
 
 
 router = APIRouter()
@@ -16,7 +15,7 @@ templates = Jinja2Templates(directory="app/templates")
 
 
 def dashboard_context(db: Session, user):
-    customers = list(db.scalars(select(Customer).where(Customer.owner_id == user.id).order_by(Customer.created_at.desc())))
+    customers = visible_customers_for_user(db, user)
     operations = list(
         db.scalars(
             select(OperationLog)
