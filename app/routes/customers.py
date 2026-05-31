@@ -16,6 +16,7 @@ from app.services.customers import (
     parse_amount,
     receive_payment,
     search_customers_for_user,
+    visible_customers_for_user,
 )
 
 
@@ -41,9 +42,32 @@ def store_customer(request: Request, customer_name: str = Form(""), db: Session 
 def search_customers(request: Request, q: str = "", db: Session = Depends(get_db)):
     user = current_user_or_redirect(request, db)
     if isinstance(user, RedirectResponse):
-        return JSONResponse({"customers": []}, status_code=401)
+        return JSONResponse(
+            {
+                "query": q,
+                "user_id": None,
+                "visible_customer_count": 0,
+                "matched_customer_count": 0,
+                "customers": [],
+            },
+            status_code=401,
+        )
+    visible_customers = visible_customers_for_user(db, user)
     customers = search_customers_for_user(db, user, q)
+    print(
+        "customer_search_diagnostics "
+        f"user_id={user.id} "
+        f"username={user.username} "
+        f"visible_customer_count={len(visible_customers)} "
+        f"matched_customer_count={len(customers)} "
+        "dashboard_query=visible_customers_for_user "
+        "search_query=visible_customers_for_user+normalized_customer_name_contains"
+    )
     return {
+        "query": q,
+        "user_id": user.id,
+        "visible_customer_count": len(visible_customers),
+        "matched_customer_count": len(customers),
         "customers": [
             {
                 "id": customer.id,

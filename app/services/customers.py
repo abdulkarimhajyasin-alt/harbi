@@ -1,4 +1,5 @@
 from decimal import Decimal, InvalidOperation
+import unicodedata
 
 from fastapi import HTTPException, status
 from sqlalchemy import exists, func, or_, select
@@ -62,6 +63,23 @@ def visible_customers_for_user(db: Session, user: User) -> list[Customer]:
     )
 
 
+def normalize_customer_search_text(value: str) -> str:
+    normalized = unicodedata.normalize("NFKC", value or "")
+    replacements = str.maketrans(
+        {
+            "أ": "ا",
+            "إ": "ا",
+            "آ": "ا",
+            "ٱ": "ا",
+            "ى": "ي",
+            "ة": "ه",
+            "ـ": "",
+        }
+    )
+    normalized = normalized.translate(replacements)
+    return "".join(character for character in normalized.casefold() if not unicodedata.combining(character)).strip()
+
+
 def get_customer_for_user(db: Session, customer_id: int, user: User) -> Customer:
     customer = db.get(Customer, customer_id)
     if not customer:
@@ -77,18 +95,13 @@ def search_customers_for_user(db: Session, user: User, query: str, limit: int = 
     term = query.strip()
     if not term:
         return []
-    escaped_term = term.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
-    return list(
-        db.scalars(
-            select(Customer)
-            .where(
-                visible_customer_filter(user),
-                Customer.customer_name.ilike(f"%{escaped_term}%", escape="\\"),
-            )
-            .order_by(Customer.customer_name.asc())
-            .limit(limit)
-        )
-    )
+    normalized_term = normalize_customer_search_text(term)
+    matched_customers = [
+        customer
+        for customer in visible_customers_for_user(db, user)
+        if normalized_term in normalize_customer_search_text(customer.customer_name)
+    ]
+    return sorted(matched_customers, key=lambda customer: customer.customer_name)[:limit]
 
 
 def add_transfer(db: Session, customer: Customer, user: User, amount: Decimal) -> OperationLog:
