@@ -30,3 +30,71 @@ document.addEventListener("keydown", (event) => {
     modal.setAttribute("aria-hidden", "true");
   });
 });
+
+const customerSearch = document.querySelector("[data-customer-search]");
+if (customerSearch) {
+  const input = customerSearch.querySelector("[data-customer-search-input]");
+  const results = customerSearch.querySelector("[data-customer-search-results]");
+  let activeRequest;
+
+  const hideResults = () => {
+    results.hidden = true;
+    results.replaceChildren();
+  };
+
+  const showEmptyResults = () => {
+    const empty = document.createElement("div");
+    empty.className = "customer-search-empty";
+    empty.textContent = "لا توجد نتائج";
+    results.replaceChildren(empty);
+    results.hidden = false;
+  };
+
+  const showCustomers = (customers) => {
+    if (!customers.length) {
+      showEmptyResults();
+      return;
+    }
+
+    const list = document.createElement("div");
+    list.className = "customer-search-list";
+    customers.forEach((customer) => {
+      const link = document.createElement("a");
+      link.href = `/customers/${customer.id}`;
+      link.className = "customer-search-result";
+      link.textContent = customer.customer_name;
+      list.appendChild(link);
+    });
+    results.replaceChildren(list);
+    results.hidden = false;
+  };
+
+  input.addEventListener("input", async () => {
+    const query = input.value.trim();
+    if (activeRequest) activeRequest.abort();
+    if (!query) {
+      hideResults();
+      return;
+    }
+
+    activeRequest = new AbortController();
+    try {
+      const response = await fetch(`/customers/search?q=${encodeURIComponent(query)}`, {
+        headers: { Accept: "application/json" },
+        signal: activeRequest.signal,
+      });
+      if (!response.ok) {
+        hideResults();
+        return;
+      }
+      const data = await response.json();
+      showCustomers(Array.isArray(data.customers) ? data.customers : []);
+    } catch (error) {
+      if (error.name !== "AbortError") hideResults();
+    }
+  });
+
+  document.addEventListener("click", (event) => {
+    if (!customerSearch.contains(event.target)) hideResults();
+  });
+}

@@ -1,7 +1,7 @@
 from urllib.parse import quote
 
 from fastapi import APIRouter, Depends, Form, HTTPException, Request
-from fastapi.responses import RedirectResponse
+from fastapi.responses import JSONResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy import delete, select
 from sqlalchemy.orm import Session, joinedload
@@ -9,7 +9,14 @@ from sqlalchemy.orm import Session, joinedload
 from app.database.session import get_db
 from app.models.operation_log import OperationLog
 from app.routes.common import current_user_or_redirect
-from app.services.customers import add_transfer, create_customer, get_customer_for_user, parse_amount, receive_payment
+from app.services.customers import (
+    add_transfer,
+    create_customer,
+    get_customer_for_user,
+    parse_amount,
+    receive_payment,
+    search_customers_for_user,
+)
 
 
 router = APIRouter()
@@ -28,6 +35,23 @@ def store_customer(request: Request, customer_name: str = Form(""), db: Session 
         db.rollback()
         return RedirectResponse(url="/dashboard", status_code=303)
     return RedirectResponse(url=f"/customers/{customer.id}", status_code=303)
+
+
+@router.get("/customers/search")
+def search_customers(request: Request, q: str = "", db: Session = Depends(get_db)):
+    user = current_user_or_redirect(request, db)
+    if isinstance(user, RedirectResponse):
+        return JSONResponse({"customers": []}, status_code=401)
+    customers = search_customers_for_user(db, user, q)
+    return {
+        "customers": [
+            {
+                "id": customer.id,
+                "customer_name": customer.customer_name,
+            }
+            for customer in customers
+        ]
+    }
 
 
 @router.get("/customers/{customer_id}")

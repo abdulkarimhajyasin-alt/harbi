@@ -40,6 +40,24 @@ def get_customer_for_user(db: Session, customer_id: int, user: User) -> Customer
     return customer
 
 
+def search_customers_for_user(db: Session, user: User, query: str, limit: int = 10) -> list[Customer]:
+    term = query.strip()
+    if not term:
+        return []
+    escaped_term = term.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
+    return list(
+        db.scalars(
+            select(Customer)
+            .where(
+                Customer.owner_id == user.id,
+                Customer.customer_name.ilike(f"%{escaped_term}%", escape="\\"),
+            )
+            .order_by(Customer.customer_name.asc())
+            .limit(limit)
+        )
+    )
+
+
 def add_transfer(db: Session, customer: Customer, user: User, amount: Decimal) -> OperationLog:
     customer.total_due += amount
     create_download_operation(db, user, "transfer", amount)

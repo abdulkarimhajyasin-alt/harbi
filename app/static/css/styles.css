@@ -254,6 +254,80 @@ input {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
+.dashboard-search-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin: -4px 0 20px;
+}
+
+.customer-search-card {
+  position: relative;
+  grid-column: 3;
+}
+
+.customer-search-card input {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 13px 14px;
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: var(--shadow);
+}
+
+.customer-search-card input:focus {
+  border-color: rgba(15, 118, 110, 0.55);
+  outline: 3px solid rgba(15, 118, 110, 0.12);
+}
+
+.customer-search-results {
+  position: absolute;
+  inset-inline: 0;
+  top: calc(100% + 8px);
+  z-index: 10;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+
+.customer-search-result,
+.customer-search-empty {
+  display: block;
+  width: 100%;
+  padding: 11px 14px;
+  color: var(--ink);
+  text-align: right;
+}
+
+.customer-search-result + .customer-search-result {
+  border-top: 1px solid var(--line);
+}
+
+.customer-search-result:hover,
+.customer-search-result:focus {
+  background: #f0fdfa;
+  color: var(--primary-dark);
+}
+
+.customer-search-empty {
+  color: var(--muted);
+}
+
+.sr-only {
+  position: absolute;
+  overflow: hidden;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  border: 0;
+  margin: -1px;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+}
+
 .metric-card,
 .action-card,
 .panel {
@@ -472,8 +546,13 @@ th {
   }
 
   .cards-grid,
+  .dashboard-search-row,
   .cards-grid.two {
     grid-template-columns: 1fr;
+  }
+
+  .customer-search-card {
+    grid-column: 1;
   }
 
   .page-head {
