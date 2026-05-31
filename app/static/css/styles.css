@@ -254,16 +254,9 @@ input {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
-.dashboard-search-row {
+.customer-search-panel {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 16px;
-  margin: -4px 0 20px;
-}
-
-.customer-search-card {
-  position: relative;
-  grid-column: 3;
+  gap: 14px;
 }
 
 .customer-search-form {
@@ -273,22 +266,21 @@ input {
   align-items: center;
 }
 
-.customer-search-card input {
+.customer-search-form input {
   width: 100%;
   border: 1px solid var(--line);
   border-radius: 8px;
   padding: 13px 14px;
   background: var(--surface);
   color: var(--ink);
-  box-shadow: var(--shadow);
 }
 
-.customer-search-card input:focus {
+.customer-search-form input:focus {
   border-color: rgba(15, 118, 110, 0.55);
   outline: 3px solid rgba(15, 118, 110, 0.12);
 }
 
-.customer-search-card button {
+.customer-search-form button {
   border: 0;
   border-radius: 8px;
   padding: 13px 18px;
@@ -296,24 +288,18 @@ input {
   color: #fff;
   cursor: pointer;
   white-space: nowrap;
-  box-shadow: var(--shadow);
 }
 
-.customer-search-card button:hover,
-.customer-search-card button:focus {
+.customer-search-form button:hover,
+.customer-search-form button:focus {
   background: var(--primary-dark);
 }
 
 .customer-search-results {
-  position: absolute;
-  inset-inline: 0;
-  top: calc(100% + 8px);
-  z-index: 10;
   overflow: hidden;
   border: 1px solid var(--line);
   border-radius: 8px;
   background: var(--surface);
-  box-shadow: var(--shadow);
 }
 
 .customer-search-result,
@@ -569,13 +555,8 @@ th {
   }
 
   .cards-grid,
-  .dashboard-search-row,
   .cards-grid.two {
     grid-template-columns: 1fr;
-  }
-
-  .customer-search-card {
-    grid-column: 1;
   }
 
   .customer-search-form {

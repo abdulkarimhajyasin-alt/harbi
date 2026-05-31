@@ -94,10 +94,10 @@ const initCustomerSearch = () => {
       }
 
       const data = await response.json();
-      showCustomers(Array.isArray(data.customers) ? data.customers : []);
+      const customers = Array.isArray(data) ? data : data.customers;
+      showCustomers(Array.isArray(customers) ? customers : []);
     } catch (error) {
       if (error.name === "AbortError") return;
-      console.error("Customer search failed", error);
       showEmptyResults();
     }
   };
