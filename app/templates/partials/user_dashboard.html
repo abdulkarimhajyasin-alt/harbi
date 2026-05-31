@@ -23,8 +23,11 @@
 {% if dashboard_user.id == current_user.id %}
 <section class="dashboard-search-row" aria-label="بحث الزبائن">
   <div class="customer-search-card" data-customer-search>
-    <label class="sr-only" for="customer-quick-search">ابحث عن زبون</label>
-    <input id="customer-quick-search" type="search" placeholder="ابحث عن زبون" autocomplete="off" data-customer-search-input>
+    <form class="customer-search-form" data-customer-search-form>
+      <label class="sr-only" for="customer-quick-search">ابحث عن زبون</label>
+      <input id="customer-quick-search" type="search" placeholder="ابحث عن زبون" autocomplete="off" data-customer-search-input>
+      <button type="submit" data-customer-search-button>بحث</button>
+    </form>
     <div class="customer-search-results" data-customer-search-results hidden></div>
   </div>
 </section>

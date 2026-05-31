@@ -31,10 +31,15 @@ document.addEventListener("keydown", (event) => {
   });
 });
 
-const customerSearch = document.querySelector("[data-customer-search]");
-if (customerSearch) {
+const initCustomerSearch = () => {
+  const customerSearch = document.querySelector("[data-customer-search]");
+  if (!customerSearch) return;
+
+  const form = customerSearch.querySelector("[data-customer-search-form]");
   const input = customerSearch.querySelector("[data-customer-search-input]");
   const results = customerSearch.querySelector("[data-customer-search-results]");
+  if (!form || !input || !results) return;
+
   let activeRequest;
 
   const hideResults = () => {
@@ -69,7 +74,7 @@ if (customerSearch) {
     results.hidden = false;
   };
 
-  input.addEventListener("input", async () => {
+  const runSearch = async () => {
     const query = input.value.trim();
     if (activeRequest) activeRequest.abort();
     if (!query) {
@@ -84,17 +89,32 @@ if (customerSearch) {
         signal: activeRequest.signal,
       });
       if (!response.ok) {
-        hideResults();
+        showEmptyResults();
         return;
       }
+
       const data = await response.json();
       showCustomers(Array.isArray(data.customers) ? data.customers : []);
     } catch (error) {
-      if (error.name !== "AbortError") hideResults();
+      if (error.name === "AbortError") return;
+      console.error("Customer search failed", error);
+      showEmptyResults();
     }
+  };
+
+  input.addEventListener("input", runSearch);
+  form.addEventListener("submit", (event) => {
+    event.preventDefault();
+    runSearch();
   });
 
   document.addEventListener("click", (event) => {
     if (!customerSearch.contains(event.target)) hideResults();
   });
+};
+
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", initCustomerSearch);
+} else {
+  initCustomerSearch();
 }

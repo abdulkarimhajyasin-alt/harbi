@@ -266,6 +266,13 @@ input {
   grid-column: 3;
 }
 
+.customer-search-form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+}
+
 .customer-search-card input {
   width: 100%;
   border: 1px solid var(--line);
@@ -279,6 +286,22 @@ input {
 .customer-search-card input:focus {
   border-color: rgba(15, 118, 110, 0.55);
   outline: 3px solid rgba(15, 118, 110, 0.12);
+}
+
+.customer-search-card button {
+  border: 0;
+  border-radius: 8px;
+  padding: 13px 18px;
+  background: var(--primary);
+  color: #fff;
+  cursor: pointer;
+  white-space: nowrap;
+  box-shadow: var(--shadow);
+}
+
+.customer-search-card button:hover,
+.customer-search-card button:focus {
+  background: var(--primary-dark);
 }
 
 .customer-search-results {
@@ -553,6 +576,10 @@ th {
 
   .customer-search-card {
     grid-column: 1;
+  }
+
+  .customer-search-form {
+    grid-template-columns: minmax(0, 1fr) auto;
   }
 
   .page-head {
