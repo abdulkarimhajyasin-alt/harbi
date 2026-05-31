@@ -40,7 +40,11 @@ def dashboard(request: Request, db: Session = Depends(get_db)):
     user = current_user_or_redirect(request, db)
     if isinstance(user, RedirectResponse):
         return user
-    return templates.TemplateResponse("dashboard.html", {"request": request, "current_user": user, **dashboard_context(db, user)})
+    return templates.TemplateResponse(
+        request=request,
+        name="dashboard.html",
+        context={"current_user": user, **dashboard_context(db, user)},
+    )
 
 
 @router.post("/dashboard/clear-log")
